@@ -4,7 +4,7 @@ from llama_index.llms.ollama import Ollama
 
 
 '''
-Fetches content from an API for the given enpoint
+Fetches content from an API for the given endpoint
 baseUrl, auth_key, content_id
 '''
 def fetchContent(baseUrl, authKey, contentId):
@@ -47,7 +47,7 @@ def invokeLlm(content):
         context_window=4000,
         retry=2)
     resp = llm.complete(content)
-    print("Summarizing Done.")
+    print("Llm call done.")
     return resp
 
 '''
