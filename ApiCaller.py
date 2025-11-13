@@ -1,6 +1,5 @@
 import os
 import httpx
-import json
 
 CMS_API_BASE_URL = os.getenv('CMS_API_BASE_URL', None)
 CMS_ENDPOINT_AUTH_KEY = os.getenv('CMS_ENDPOINT_AUTH_KEY', None)
