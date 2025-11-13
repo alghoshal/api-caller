@@ -1,14 +1,16 @@
 import httpx
 
-from llama_index.llms.ollama import Ollama 
-
+from llama_index.llms.ollama import Ollama
+from Utilities import sanitize
 
 '''
 Fetches content from an API for the given endpoint
 baseUrl, auth_key, content_id
 '''
+
+
 def fetchContent(baseUrl, authKey, contentId):
-    with httpx.Client( # Talk to CMS 
+    with httpx.Client(# Talk to CMS 
         # enable HTTP2 support 
         # http2=True, 
         # set headers for all requests 
@@ -20,30 +22,33 @@ def fetchContent(baseUrl, authKey, contentId):
             headers = {
                 k.lower().strip():v.strip() for 
                 k, sep, v in 
-                {(authKey.partition(":") or None), 
-                    ("User-Agent", ":", "py-api-caller")} if 
-                v is not None}
-        resp = client.get(baseUrl + contentId, 
-            headers=headers, 
+                {(authKey.partition(":") or None),
+                    ("User-Agent", ":", "py-api-caller")} 
+                if v is not None
+                }
+        resp = client.get(baseUrl + contentId,
+            headers=headers,
             follow_redirects=True)
         
         if resp.status_code != 200: 
         	content = "";
-        	print("Error!! Response code: "+str(resp.status_code))
+        	print("Error!! Response code: " + str(resp.status_code))
         	exit(1)
         else:
 	        content = resp.json()['data']['attributes']['text']
 	        print("Content fetched.")
 	    
-    return content
+    return sanitize(content)
 
 '''
 Calls an llm with the content
 '''
+
+
 def invokeLlm(content):
     llm = Ollama(
-        model="llama3.2:1b", 
-        request_timeout=600.0, 
+        model="llama3.2:1b",
+        request_timeout=600.0,
         context_window=4000,
         retry=2)
     resp = llm.complete(content)
@@ -54,8 +59,10 @@ def invokeLlm(content):
 Updates content via Http PATCH request to an API call at the given endpoint
 baseUrl, auth_key, content_id, fieldName, fieldValue
 '''
+
+
 def updateContent(baseUrl, authKey, contentId, fieldName, fieldValue):
-    with httpx.Client( # Talk to CMS 
+    with httpx.Client(# Talk to CMS 
         # enable HTTP2 support 
         # http2=True, 
         # set headers for all requests 
@@ -67,18 +74,18 @@ def updateContent(baseUrl, authKey, contentId, fieldName, fieldValue):
             headers = {
                 k.strip():v.strip() for 
                 k, sep, v in 
-                {(authKey.partition(":") or None), 
+                {(authKey.partition(":") or None),
                     ("User-Agent", ":", "py-api-caller"),
-                    ("Content-Type",":","application/json")} if 
+                    ("Content-Type", ":", "application/json")} if 
                 v is not None}
-        data = "{\""+fieldName+"\":\""+fieldValue+"\"}"
-        resp = client.patch(baseUrl + contentId, 
-            headers=headers, 
+        data = "{\"" + fieldName + "\":\"" + fieldValue + "\"}"
+        resp = client.patch(baseUrl + contentId,
+            headers=headers,
             data=data,
             follow_redirects=True)
         
         if resp.status_code != 200: 
-        	print("Error!! Response code: "+str(resp.status_code))
+        	print("Error!! Response code: " + str(resp.status_code))
         	print(resp)
         else:
 	        print("Content updated.")
