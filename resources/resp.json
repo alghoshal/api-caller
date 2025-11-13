@@ -1,0 +1,85 @@
+{
+	"links": {
+		"self": "http://someone.com/api/v1/article/123232"
+	},
+	"data": {
+		"type": "articles",
+		"id": "",
+		"attributes": {
+			"typeAlias": "com_content.article",
+			"id": 123232,
+			"asset_id": 232323,
+			"title": "",
+			"alias": "",
+			"state": 1,
+			"created": "",
+			"created_by": 111111,
+			"created_by_alias": "",
+			"modified": "",
+			"modified_by": 222222,
+			"publish_up": "",
+			"publish_down": null,
+			"images": {
+				"image_intro": "",
+				"image_intro_alt": "",
+				"float_intro": "",
+				"image_intro_caption": "",
+				"image_fulltext": "",
+				"image_fulltext_alt": "",
+				"float_fulltext": "",
+				"image_fulltext_caption": ""
+			},
+			"urls": {
+				"urla": "",
+				"urlatext": "",
+				"targeta": "",
+				"urlb": "",
+				"urlbtext": "",
+				"targetb": "",
+				"urlc": "",
+				"urlctext": "",
+				"targetc": ""
+			},
+			"version": 23232,
+			"metakey": "",
+			"metadesc": "",
+			"access": 1,
+			"hits": 2323,
+			"metadata": {
+				"robots": "",
+				"author": "",
+				"rights": ""
+			},
+			"featured": 0,
+			"language": "*",
+			"note": "",
+			"tags": [],
+			"featured_up": null,
+			"featured_down": null,
+			"text": "",
+			"sum2": "",
+			"hindi": "",
+			"bangla": ""
+		},
+		"relationships": {
+			"category": {
+				"data": {
+					"type": "categories",
+					"id": ""
+				}
+			},
+			"created_by": {
+				"data": {
+					"type": "users",
+					"id": ""
+				}
+			},
+			"modified_by": {
+				"data": {
+					"type": "users",
+					"id": ""
+				}
+			}
+		}
+	}
+}
