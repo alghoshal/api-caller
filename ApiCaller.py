@@ -6,7 +6,11 @@ CMS_ENDPOINT_AUTH_KEY = os.getenv('CMS_ENDPOINT_AUTH_KEY', None)
 FIELD_NAME_SUMMARY = os.getenv('FIELD_NAME_SUMMARY', 'sum2')
 CONTENT_ID="32"
 
-def fetchContent(CMS_API_BASE_URL, CMS_ENDPOINT_AUTH_KEY, CONTENT_ID):
+'''
+Fetches content from an API for the given enpoint
+baseUrl, auth_key, content_id
+'''
+def fetchContent(baseUrl, authKey, contentId):
     with httpx.Client( # Talk to CMS 
         # enable HTTP2 support 
         # http2=True, 
@@ -15,14 +19,14 @@ def fetchContent(CMS_API_BASE_URL, CMS_ENDPOINT_AUTH_KEY, CONTENT_ID):
         # max_redirects=2,
         ) as client:
         headers = None
-        if CMS_ENDPOINT_AUTH_KEY is not None:
+        if authKey is not None:
             headers = {
                 k.lower().strip():v.strip() for 
                 k, sep, v in 
-                {(CMS_ENDPOINT_AUTH_KEY.partition(":") or None), 
+                {(authKey.partition(":") or None), 
                     ("User-Agent", ":", "py-api-caller")} if 
                 v is not None}
-        resp = client.get(CMS_API_BASE_URL + CONTENT_ID, 
+        resp = client.get(baseUrl + contentId, 
             headers=headers, 
             follow_redirects=True)
         
@@ -36,6 +40,9 @@ def fetchContent(CMS_API_BASE_URL, CMS_ENDPOINT_AUTH_KEY, CONTENT_ID):
 	    
     return content
 
+'''
+Invokes a llm to summarize the content
+'''
 def summarize(content):
     from llama_index.llms.ollama import Ollama # Get LLM to Summarize
     llm = Ollama(
@@ -47,7 +54,11 @@ def summarize(content):
     print("Summarizing Done.")
     return resp
 
-def updateContent(cmsApiBaseUrl, authKey, contentId, fieldName, value):
+'''
+Updates content via Http PATCH request to an API call at the given enpoint
+baseUrl, auth_key, content_id, fieldName, fieldValue
+'''
+def updateContent(baseUrl, authKey, contentId, fieldName, fieldValue):
     with httpx.Client( # Talk to CMS 
         # enable HTTP2 support 
         # http2=True, 
@@ -64,8 +75,8 @@ def updateContent(cmsApiBaseUrl, authKey, contentId, fieldName, value):
                     ("User-Agent", ":", "py-api-caller"),
                     ("Content-Type",":","application/json")} if 
                 v is not None}
-        data = "{\""+fieldName+"\":\""+value+"\"}"
-        resp = client.patch(cmsApiBaseUrl + contentId, 
+        data = "{\""+fieldName+"\":\""+fieldValue+"\"}"
+        resp = client.patch(baseUrl + contentId, 
             headers=headers, 
             data=data,
             follow_redirects=True)
