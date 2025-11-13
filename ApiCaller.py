@@ -1,10 +1,7 @@
-import os
 import httpx
 
-CMS_API_BASE_URL = os.getenv('CMS_API_BASE_URL', None)
-CMS_ENDPOINT_AUTH_KEY = os.getenv('CMS_ENDPOINT_AUTH_KEY', None)
-FIELD_NAME_SUMMARY = os.getenv('FIELD_NAME_SUMMARY', 'sum2')
-CONTENT_ID="32"
+from llama_index.llms.ollama import Ollama 
+
 
 '''
 Fetches content from an API for the given enpoint
@@ -41,21 +38,20 @@ def fetchContent(baseUrl, authKey, contentId):
     return content
 
 '''
-Invokes a llm to summarize the content
+Calls an llm with the content
 '''
-def summarize(content):
-    from llama_index.llms.ollama import Ollama # Get LLM to Summarize
+def invokeLlm(content):
     llm = Ollama(
         model="llama3.2:1b", 
         request_timeout=600.0, 
         context_window=4000,
         retry=2)
-    resp = llm.complete("Summarize the following in less than 40 words (only include the summary in the response): " + content)
+    resp = llm.complete(content)
     print("Summarizing Done.")
     return resp
 
 '''
-Updates content via Http PATCH request to an API call at the given enpoint
+Updates content via Http PATCH request to an API call at the given endpoint
 baseUrl, auth_key, content_id, fieldName, fieldValue
 '''
 def updateContent(baseUrl, authKey, contentId, fieldName, fieldValue):
@@ -88,14 +84,3 @@ def updateContent(baseUrl, authKey, contentId, fieldName, fieldValue):
 	        print("Content updated.")
 	    
     return resp
-
-# Fetch content
-content = fetchContent(CMS_API_BASE_URL, CMS_ENDPOINT_AUTH_KEY, CONTENT_ID)
-
-# Summarize
-if content is not None:
-    summary=summarize(content)
-
-# Update summary
-if summary is not None:
-    finalResponse = updateContent(CMS_API_BASE_URL, CMS_ENDPOINT_AUTH_KEY, CONTENT_ID,FIELD_NAME_SUMMARY,summary.text)
