@@ -1,22 +1,16 @@
 import httpx
-
 from llama_index.llms.ollama import Ollama
 from Utilities import sanitize
+
+BASE_MODEL = "llama3.2:1b"
+GUARD_MODEL = "llama-guard3:1b"
 
 '''
 Fetches content from an API for the given endpoint
 baseUrl, auth_key, content_id
 '''
-
-
 def fetchContent(baseUrl, authKey, contentId):
-    with httpx.Client(# Talk to CMS 
-        # enable HTTP2 support 
-        # http2=True, 
-        # set headers for all requests 
-        # headers={"x-secret": "foo"} 
-        # max_redirects=2,
-        ) as client:
+    with httpx.Client() as client:
         headers = None
         if authKey is not None:
             headers = {
@@ -43,32 +37,38 @@ def fetchContent(baseUrl, authKey, contentId):
 '''
 Calls an llm with the content
 '''
-
-
 def invokeLlm(content):
     llm = Ollama(
-        model="llama3.2:1b",
+        model=BASE_MODEL,
         request_timeout=600.0,
         context_window=4000,
-        retry=2)
+        retry=1)
     resp = llm.complete(content)
     print("Llm call done.")
     return resp
+
+
+def isSafe(content):
+    # Determines if content is safe using the guard
+    guard = Ollama(model=GUARD_MODEL, 
+        request_timeout=120.0, 
+        context_window=4000, 
+        retry=1)
+    guardResp = guard.complete(content)
+    print("Guard validation: "+guardResp.text)
+    return not guardResp.text.startswith("unsafe")
+
+def invokeWithGuardrails(content):
+    resp = invokeLlm(sanitize(content))
+    if isSafe(resp.text): return resp
+    raise Exception("Input: "+content+", led to unsafe reply: "+resp.text)
 
 '''
 Updates content via Http PATCH request to an API call at the given endpoint
 baseUrl, auth_key, content_id, fieldName, fieldValue
 '''
-
-
 def updateContent(baseUrl, authKey, contentId, fieldName, fieldValue):
-    with httpx.Client(# Talk to CMS 
-        # enable HTTP2 support 
-        # http2=True, 
-        # set headers for all requests 
-        # headers={"x-secret": "foo"} 
-        # max_redirects=2,
-        ) as client:
+    with httpx.Client() as client:
         headers = None
         if authKey is not None:
             headers = {
@@ -76,8 +76,8 @@ def updateContent(baseUrl, authKey, contentId, fieldName, fieldValue):
                 k, sep, v in 
                 {(authKey.partition(":") or None),
                     ("User-Agent", ":", "py-api-caller"),
-                    ("Content-Type", ":", "application/json")} if 
-                v is not None}
+                    ("Content-Type", ":", "application/json")} 
+                if v is not None}
         data = "{\"" + fieldName + "\":\"" + fieldValue + "\"}"
         resp = client.patch(baseUrl + contentId,
             headers=headers,

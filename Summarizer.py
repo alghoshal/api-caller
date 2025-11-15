@@ -1,6 +1,6 @@
 import os
 
-from ApiCaller import fetchContent, invokeLlm, updateContent
+from ApiCaller import fetchContent, invokeWithGuardrails, updateContent
 
 CMS_API_BASE_URL = os.getenv('CMS_API_BASE_URL', None)
 CMS_ENDPOINT_AUTH_KEY = os.getenv('CMS_ENDPOINT_AUTH_KEY', None)
@@ -12,7 +12,7 @@ content = fetchContent(CMS_API_BASE_URL, CMS_ENDPOINT_AUTH_KEY, CONTENT_ID)
 
 # Summarize
 if content is not None:
-    summary=invokeLlm("Summarize the following in less than 40 words (only include the summary in the response): " +content)
+    summary=invokeWithGuardrails("Summarize the following in less than 40 words (only include the summary in the response): " +content)
 
 # Update summary
 if summary is not None:
