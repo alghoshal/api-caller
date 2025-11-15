@@ -1,9 +1,10 @@
 import httpx
 from llama_index.llms.ollama import Ollama
 from Utilities import sanitize
+import os
 
-BASE_MODEL = "llama3.2:1b"
-GUARD_MODEL = "llama-guard3:1b"
+BASE_MODEL = os.getenv("BASE_MODEL","llama3.2:1b")
+GUARD_MODEL = os.getenv("GUARD_MODEL","llama-guard3:1b")
 
 '''
 Fetches content from an API for the given endpoint
@@ -47,7 +48,11 @@ def invokeLlm(content):
     print("Llm call done.")
     return resp
 
-
+'''
+True if the content is found to be safe and doesn't violate any of 
+the MLCommons AI Safety Taxonomies/ Categories 
+(ref: Llama Guard & https://mlcommons.org/2024/04/mlc-aisafety-v0-5-poc/)
+'''
 def isSafe(content):
     # Determines if content is safe using the guard
     guard = Ollama(model=GUARD_MODEL, 
@@ -55,9 +60,13 @@ def isSafe(content):
         context_window=4000, 
         retry=1)
     guardResp = guard.complete(content)
-    print("Guard validation: "+guardResp.text)
+    print("Guardrails: "+guardResp.text)
     return not guardResp.text.startswith("unsafe")
 
+'''
+Invokes guardrails pre/ post invokeLlm
+Throws Exception if the guardrail fails
+'''
 def invokeWithGuardrails(content):
     resp = invokeLlm(sanitize(content))
     if isSafe(resp.text): return resp
